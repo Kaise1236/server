@@ -1,0 +1,49 @@
+// interactions.js
+const express = require('express');
+const router = express.Router();
+
+// Command handlers
+const commandHandlers = {
+    ping: (data) => {
+        return { type: 4, data: { content: 'Pong!' } };
+    },
+    hello: (data) => {
+        return { type: 4, data: { content: 'Hello there!' } };
+    },
+    // Add more command handlers as needed
+};
+
+// Define the interactions endpoint
+router.post('/interactions', (req, res) => {
+    const { type, data } = req.body;
+
+    // Validate the incoming request structure
+    if (!type || !data) {
+        return res.status(400).send({ error: 'Missing type or data' });
+    }
+
+    // Handle interaction types
+    if (type === 1) {
+        // Acknowledge the interaction
+        return res.status(200).send({ type: 1 });
+    }
+
+    if (type === 2) {
+        // Handle command interaction
+        const commandName = data.name;
+
+        // Check if the command exists and execute it
+        if (commandHandlers[commandName]) {
+            const response = commandHandlers[commandName](data);
+            return res.status(200).send(response);
+        }
+
+        // Handle unknown commands
+        return res.status(400).send({ error: 'Unknown command' });
+    }
+
+    // Default response for unsupported interaction types
+    return res.status(400).send({ error: 'Invalid interaction type' });
+});
+
+module.exports = router;
